@@ -3,66 +3,40 @@ package edu.cmu.cs.cs214.rec02;
 import java.util.Arrays;
 
 /**
- * A resizable-array implementation of the {@link IntQueue} interface. The head of
- * the queue starts out at the head of the array, allowing the queue to grow and
- * shrink in constant time.
- *
- * TODO: This implementation contains three bugs! Use your tests to determine the
- * source of the bugs and correct them!
- *
- * @author Alex Lockwood
- * @author Ye Lu
+ * ArrayIntQueue – IntQueue интерфэйсийн массив дээр суурилсан хэрэгжилт.
+ * Доорх кодонд эх хувилбар дахь 3 алдааг зассан.
  */
 public class ArrayIntQueue implements IntQueue {
 
-    /**
-     * An array holding this queue's data
-     */
-    private int[] elementData;
-
-    /**
-     * Index of the next dequeue-able value
-     */
-    private int head;
-
-    /**
-     * Current size of queue
-     */
-    private int size;
-
-    /**
-     * The initial size for new instances of ArrayQueue
-     */
+    private int[] elementData;   // Массивт хадгалах өгөгдлүүд
+    private int head;            // Эхний элемент рүү заах индекс
+    private int size;            // Одоогийн урт
     private static final int INITIAL_SIZE = 10;
 
-    /**
-     * Constructs an empty queue with an initial capacity of ten.
-     */
     public ArrayIntQueue() {
         elementData = new int[INITIAL_SIZE];
         head = 0;
         size = 0;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void clear() {
         Arrays.fill(elementData, 0);
         size = 0;
         head = 0;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Integer dequeue() {
-        if (isEmpty()) {
-            return null;
-        }
+        if (isEmpty()) return null;
+
         Integer value = elementData[head];
-        head = (head + 1) % elementData.length;
+        head = (head + 1) % elementData.length; // Эргэлтийн индекс
         size--;
         return value;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public boolean enqueue(Integer value) {
         ensureCapacity();
         int tail = (head + size) % elementData.length;
@@ -71,36 +45,80 @@ public class ArrayIntQueue implements IntQueue {
         return true;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public boolean isEmpty() {
-        return size >= 0;
+        /**
+         * ❌ BUG #1 – Буруу нөхцөл
+         * 
+         * Эх код:
+         *     return size >= 0;
+         * 
+         * Учир:
+         *     size хэзээ ч сөрөг болдоггүй → энэ нь үргэлж TRUE болно.
+         *     Өөрөөр хэлбэл queue хоосон эсэхийг шалгаж чадахгүй.
+         *
+         * ✔ Шийдэл:
+         *     Жинхэнэ хоосон нөхцөл → size == 0
+         */
+        return size == 0;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Integer peek() {
+        /**
+         * ❌ BUG #2 – Хоосон үед NULL буцаахгүй байсан
+         *
+         * Эх код:
+         *     return elementData[head];
+         *
+         * Учир:
+         *     Queue хоосон байхад elementData[0] → 0 буцаана.
+         *     Энэ нь IntQueue тодорхойлолтыг зөрчинө.
+         *
+         * ✔ Шийдэл:
+         *     Хоосон бол null буцаана.
+         */
+        if (isEmpty()) return null;
         return elementData[head];
     }
 
-    /** {@inheritDoc} */
+    @Override
     public int size() {
         return size;
     }
 
     /**
-     * Increases the capacity of this <tt>ArrayIntQueue</tt> instance, if
-     * necessary, to ensure that it can hold at least size + 1 elements.
+     * Queue–д зай хүрэхгүй үед багтаамжийг 2 дахин нэмэгдүүлнэ.
      */
     private void ensureCapacity() {
         if (size == elementData.length) {
+
+            /**
+             * ❌ BUG #3 – Массивыг нэмэх үед буруу хуулдаг байсан
+             *
+             * Эх кодонд хоёр давталттай, буруу индекс тооцдог байсан:
+             *   - wrap-around үед элементүүдийн дараалал алдагдана
+             *   - FIFO дараалал эвдэрнэ
+             *
+             * ✔ Шийдэл:
+             *   Queue–ийн логик дарааллын дагуу хуулна:
+             *     new[0] = old[head]
+             *     new[1] = old[(head + 1) % len]
+             *     ...
+             *     new[size-1] = old[(head + size - 1) % len]
+             *
+             *   Мөн дараа нь head = 0 болгоно.
+             */
+
             int oldCapacity = elementData.length;
-            int newCapacity = 2 * oldCapacity + 1;
+            int newCapacity = oldCapacity * 2 + 1;
             int[] newData = new int[newCapacity];
-            for (int i = head; i < oldCapacity; i++) {
-                newData[i - head] = elementData[i];
+
+            // Логик дарааллаар хуулж шинэ массивт байрлуулах
+            for (int i = 0; i < size; i++) {
+                newData[i] = elementData[(head + i) % oldCapacity];
             }
-            for (int i = 0; i < head; i++) {
-                newData[head - i] = elementData[i];
-            }
+
             elementData = newData;
             head = 0;
         }
