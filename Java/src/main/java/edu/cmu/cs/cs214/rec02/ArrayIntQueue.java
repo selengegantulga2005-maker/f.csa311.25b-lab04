@@ -75,7 +75,7 @@ public class ArrayIntQueue implements IntQueue {
          *     Queue хоосон байхад elementData[0] → 0 буцаана.
          *     Энэ нь IntQueue тодорхойлолтыг зөрчинө.
          *
-         * ✔ Шийдэл:
+         *  Шийдэл:
          *     Хоосон бол null буцаана.
          */
         if (isEmpty()) return null;
