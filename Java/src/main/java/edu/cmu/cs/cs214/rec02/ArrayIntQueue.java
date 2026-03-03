@@ -48,7 +48,7 @@ public class ArrayIntQueue implements IntQueue {
     @Override
     public boolean isEmpty() {
         /**
-         * ❌ BUG #1 – Буруу нөхцөл
+         *  BUG #1 – Буруу нөхцөл
          * 
          * Эх код:
          *     return size >= 0;
@@ -66,7 +66,7 @@ public class ArrayIntQueue implements IntQueue {
     @Override
     public Integer peek() {
         /**
-         * ❌ BUG #2 – Хоосон үед NULL буцаахгүй байсан
+         *  BUG #2 – Хоосон үед NULL буцаахгүй байсан
          *
          * Эх код:
          *     return elementData[head];
@@ -94,13 +94,13 @@ public class ArrayIntQueue implements IntQueue {
         if (size == elementData.length) {
 
             /**
-             * ❌ BUG #3 – Массивыг нэмэх үед буруу хуулдаг байсан
+             *  BUG #3 – Массивыг нэмэх үед буруу хуулдаг байсан
              *
              * Эх кодонд хоёр давталттай, буруу индекс тооцдог байсан:
              *   - wrap-around үед элементүүдийн дараалал алдагдана
              *   - FIFO дараалал эвдэрнэ
              *
-             * ✔ Шийдэл:
+             *  Шийдэл:
              *   Queue–ийн логик дарааллын дагуу хуулна:
              *     new[0] = old[head]
              *     new[1] = old[(head + 1) % len]
